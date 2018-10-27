@@ -1,6 +1,9 @@
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
-import time
+import matplotlib.animation as anim
+
 from IPython import get_ipython
 get_ipython().magic('%matplotlib')
 
@@ -11,9 +14,7 @@ y_dim = 50
 
 def next_generation(world):
     "return a series for livelihood of next generation"
-    atime = time.time()
     counts = neighbor_counts(world)
-    print('time to find neighbor counts: {}'.format(time.time() - atime))
     new_world = {k:z for k,v in counts.items() for z in [1 if (v == 2 or v == 3) else 0]}
     return new_world
 
@@ -45,30 +46,59 @@ def display(world):
     living = [k for k,v in world.items() if not (v < threshold)]
     ax.scatter([x for x in map(lambda a: a[0], living)],
                [y for y in map(lambda a: a[1], living)])
-    ax.set_xticks(np.arange(-0.5,50.5))
-    ax.set_yticks(np.arange(-0.5,50.5))
+    ax.set_xticks(np.arange(-0.5,x_dim+0.5))
+    ax.set_yticks(np.arange(-0.5,y_dim+0.5))
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.grid(True)
     plt.show()
 
-def main():
-    world = {key:value for key in ((x,y) for x in range(x_dim) for y in range(y_dim))
-                       for value in np.random.randint(0, 2, x_dim*y_dim)}
-    display(world)
-    a_time = time.time()
-    world2 = next_generation(world)
-    print('time to generate new world: {}'.format(time.time() - a_time))
-    display(world2)
+def update_plot(i, generations, scat):
+    print('hi')
+    print(scat.get_offsets())
+    living = [k for k,v in generations[i].items() if not (v < threshold)]
+    scat.set_offsets(living)
+    return scat,
+
+def updater(i):
+    print('hi')
+    living = [k for k,v in generations[i].items() if not (v < threshold)]
+    scat.set_offsets(living)
 
 
+fig, ax = plt.subplots(figsize=(10,10))
+ax.set_xlim(-1,51)
+ax.set_ylim(-1,51)
+ax.set_xticks(np.arange(-0.5,x_dim+0.5))
+ax.set_yticks(np.arange(-0.5,y_dim+0.5))
+ax.set_xticklabels([])
+ax.set_yticklabels([])
+ax.grid(True)
 
-if __name__ == '__main__':
-    main()
+world = {key:0 for key in ((x,y) for x in range(x_dim) for y in range(y_dim))}
+
+world[(5,5)] = 1
+world[(6,5)] = 1
+world[(7,5)] = 1
+world[(11,8)] = 1
+world[(11,9)] = 1
+world[(21,20)] = 1
+world[(21,22)] = 1
+world[(41,40)] = 1
+world[(41,42)] = 1
+world[(42,43)] = 1
+world[(42,44)] = 1
 
 
-# for repl testing purposes
-main()
+num_frames = 25
+living = [k for k,v in world.items() if not (v < threshold)]
+scat = ax.scatter([x for x in map(lambda a: a[0], living)],
+                  [y for y in map(lambda a: a[1], living)])
+
+generations = [world]
+for i in range(num_frames):
+    generations.append(next_generation(generations[i]))
 
 
-
+ani = anim.FuncAnimation(fig, updater, interval=200, frames=range(num_frames))
+plt.show()
