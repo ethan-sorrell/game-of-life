@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as anim
 
-from IPython import get_ipython
-get_ipython().magic('%matplotlib')
+# from IPython import get_ipython
+# get_ipython().magic('%matplotlib')
 
 plt.style.use('fivethirtyeight')
 
